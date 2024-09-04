@@ -1,0 +1,34 @@
+if clang Compiler clang         else Compiler cl
+if debug Assembly refterm_debug else Assembly refterm
+RunAssembly
+
+IncludedSourceFiles refterm.c refterm_example_dwrite.cpp
+
+CLCompilerFlags     /W3 /Z7 /GS- /Gs999999
+CLLinkerFlags       /incremental:no /opt:icf /opt:ref
+if debug            CLCompilerFlags /Od
+if !debug           CLCompilerFlags /O2
+
+ClangCompilerFlags  -g -nostdlib -nostdlib++ -mno-stack-arg-probe -maes
+ClangLinkerFlags    -fuse-ld=lld
+if debug            ClangCompilerFlags -O0
+if !debug           ClangCompilerFlags -O3
+if debug            Defines _DEBUG
+
+if clang {
+    CompilerFlags   $ClangCompilerFlags
+    LinkerFlags     $ClangLinkerFlags -Wl,-subsystem:windows
+} else {
+    CompilerFlags   $CLCompilerFlags
+    LinkerFlags     $CLLinkerFlags /subsystem:windows
+}
+
+PreBuild.Cmd        fxc /nologo /T cs_5_0 /E ComputeMain /O3 /WX /Fh refterm_cs.h /Vn ReftermCSShaderBytes /Qstrip_reflect /Qstrip_debug /Qstrip_priv refterm.hlsl
+PreBuild.Cmd        fxc /nologo /T ps_5_0 /E PixelMain /O3 /WX /Fh refterm_ps.h /Vn ReftermPSShaderBytes /Qstrip_reflect /Qstrip_debug /Qstrip_priv refterm.hlsl
+PreBuild.Cmd        fxc /nologo /T vs_5_0 /E VertexMain /O3 /WX /Fh refterm_vs.h /Vn ReftermVSShaderBytes /Qstrip_reflect /Qstrip_debug /Qstrip_priv refterm.hlsl
+PostBuild.Cmd       cl /nologo /Fesplat.exe $CLCompilerFlags splat.cpp /link $CLLinkerFlags /subsystem:console
+PostBuild.Cmd       cl /nologo /Fesplat2.exe $CLCompilerFlags splat2.cpp /link $CLLinkerFlags /subsystem:console
+
+AssertArchitecture  x64
+AssertProgramExists cl fxc
+Program.cl|fxc.ErrorMessage "cl" or "fxc" not found - please run this from the MSVC x64 native tools command prompt.
