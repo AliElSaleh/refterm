@@ -29,6 +29,7 @@ PreBuild.Cmd        fxc /nologo /T vs_5_0 /E VertexMain /O3 /WX /Fh refterm_vs.h
 PostBuild.Cmd       cl /nologo /Fesplat.exe $CLCompilerFlags splat.cpp /link $CLLinkerFlags /subsystem:console
 PostBuild.Cmd       cl /nologo /Fesplat2.exe $CLCompilerFlags splat2.cpp /link $CLLinkerFlags /subsystem:console
 
+AssertPlatform      Windows
 AssertArchitecture  x64
 AssertProgramExists cl fxc
 Program.cl|fxc.ErrorMessage "cl" or "fxc" not found - please run this from the MSVC x64 native tools command prompt.
