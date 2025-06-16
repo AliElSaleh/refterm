@@ -1,8 +1,8 @@
 if clang Compiler clang         else Compiler cl
 if debug Assembly refterm_debug else Assembly refterm
-RunAssembly
+.run
 
-IncludedSourceFiles refterm.c refterm_example_dwrite.cpp
+SourceFiles         refterm.c refterm_example_dwrite.cpp
 
 CLCompilerFlags     /W3 /Z7 /GS- /Gs999999
 CLLinkerFlags       /incremental:no /opt:icf /opt:ref
@@ -15,12 +15,15 @@ if debug            ClangCompilerFlags -O0
 if !debug           ClangCompilerFlags -O3
 if debug            Defines _DEBUG
 
-if clang {
-    CompilerFlags   $ClangCompilerFlags
-    LinkerFlags     $ClangLinkerFlags -Wl,-subsystem:windows
-} else {
-    CompilerFlags   $CLCompilerFlags
-    LinkerFlags     $CLLinkerFlags /subsystem:windows
+if clang
+{
+    Compiler.Flags   $ClangCompilerFlags
+    Linker.Flags     $ClangLinkerFlags -Wl,-subsystem:windows
+}
+else
+{
+    Compiler.Flags   $CLCompilerFlags
+    Linker.Flags     $CLLinkerFlags /subsystem:windows
 }
 
 PreBuild.Cmd        fxc /nologo /T cs_5_0 /E ComputeMain /O3 /WX /Fh refterm_cs.h /Vn ReftermCSShaderBytes /Qstrip_reflect /Qstrip_debug /Qstrip_priv refterm.hlsl
@@ -29,7 +32,9 @@ PreBuild.Cmd        fxc /nologo /T vs_5_0 /E VertexMain /O3 /WX /Fh refterm_vs.h
 PostBuild.Cmd       cl /nologo /Fesplat.exe $CLCompilerFlags splat.cpp /link $CLLinkerFlags /subsystem:console
 PostBuild.Cmd       cl /nologo /Fesplat2.exe $CLCompilerFlags splat2.cpp /link $CLLinkerFlags /subsystem:console
 
-AssertPlatform      Windows
-AssertArchitecture  x64
-AssertProgramExists cl fxc
-Program.cl|fxc.ErrorMessage "cl" or "fxc" not found - please run this from the MSVC x64 native tools command prompt.
+Assert.Platform      Windows
+Assert.Architecture  x64
+Assert.Program       cl fxc
+
+Program.cl.ErrorMessage  "cl" not found - please run this from the MSVC x64 native tools command prompt.
+Program.fxc.ErrorMessage "fxc" not found - please run this from the MSVC x64 native tools command prompt.
